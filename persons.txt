@@ -1,0 +1,6 @@
+23hp!!PPAB,Harry,Potter,4|Privet Drive|Melbourne|Victoria|Australia,31-07-1980,false
+29hg@@PPJK,Hermione,Granger,12|Main Street|Melbourne|Victoria|Australia,19-09-1979,false
+35rw##MMWS,Ron,Weasley,2|Main Street|Melbourne|Victoria|Australia,01-03-1980,false
+42dm**SSDD,Draco,Malfoy,6|Main Street|Melbourne|Victoria|Australia,05-06-1980,false
+28ln%%ZZLL,Luna,Lovegood,9|Main Street|Melbourne|Victoria|Australia,13-02-2008,false
+28ab!!zzPP,Neville,Longbottom,10|La trobe Street|Melbourne|Victoria|Australia,30-07-1990,false
