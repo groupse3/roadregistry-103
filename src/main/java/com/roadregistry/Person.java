@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+// creating Person class with attributes
 public class Person {
     private String personID;
     private String firstName;
@@ -14,12 +15,14 @@ public class Person {
     private boolean isSuspended = false;
     private HashMap<LocalDate, Integer> demeritPoints = new HashMap<>();
 
+    // setting filepath to relevant txt file
     private String filePath = "persons.txt";
 
     public void setFilePath(String path) {
         this.filePath = path;
     }
 
+    // Person constructor
     public Person(String personID, String firstName, String lastName, String address, String birthday) {
         this.personID = personID;
         this.firstName = firstName;
@@ -28,6 +31,7 @@ public class Person {
         this.birthday = birthday;
     }
 
+    // AddPerson method
     public boolean addPerson() {
         if (!isValidID(this.personID) || !isValidAddress(this.address) || !isValidDate(this.birthday)) {
             return false;
@@ -36,6 +40,7 @@ public class Person {
         try {
             File file = new File(filePath);
 
+            // checking if file exists and if person already exists in file
             if (file.exists()) {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 String line;
@@ -49,6 +54,7 @@ public class Person {
                 reader.close();
             }
 
+            // Appending person to txt file
             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true));
             writer.write(toCSV());
             writer.newLine();
@@ -60,6 +66,7 @@ public class Person {
         }
     }
 
+    // Update Person Details method
     public boolean updatePersonalDetails(String newID, String newFirstName, String newLastName, String newAddress, String newBirthday) {
         try {
             File inputFile = new File(filePath);
@@ -69,6 +76,7 @@ public class Person {
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
             String line;
 
+            // splitting file data into parts to obtain details to compare
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",", -1);
                 if (parts.length < 6) {
@@ -83,45 +91,60 @@ public class Person {
                 String originalBirthday = parts[4];
                 String originalIsSuspended = parts[5];
 
+                // identifying Ids and using boolean to find out which data is changing
                 if (originalID.equals(this.personID)) {
                     int age = getAge(originalBirthday);
 
+                    String updatedLine;
+
+                    //checking if birthday is changing
                     boolean birthdayChanging = !newBirthday.equals(originalBirthday);
-                    boolean otherChanging = !newID.equals(originalID) ||
-                            !newFirstName.equals(originalFirstName) ||
-                            !newLastName.equals(originalLastName) ||
-                            !newAddress.equals(originalAddress);
-
-                    if (birthdayChanging && otherChanging) {
+                    if (birthdayChanging) {
                         finalLines.add(line);
-                        continue;
+
+                        updatedLine = String.join(",", originalID, originalFirstName, originalLastName, originalAddress, newBirthday, originalIsSuspended);
                     }
 
-                    if (age < 18 && !newAddress.equals(originalAddress)) {
-                        finalLines.add(line);
-                        continue;
+                    //if birthdate is not changing, other details can be changed
+                    else {
+                        boolean otherChanging = !newID.equals(originalID) ||
+                                !newFirstName.equals(originalFirstName) ||
+                                !newLastName.equals(originalLastName) ||
+                                !newAddress.equals(originalAddress);
+
+                        // Update all changing details
+//                        if (birthdayChanging && otherChanging) {
+//                            finalLines.add(line);
+//                            continue;
+//                        }
+
+                        if (age > 18 && !newAddress.equals(originalAddress)) {
+                            finalLines.add(line);
+                            continue;
+                        }
+
+                        if (isEvenDigit(originalID.charAt(0)) && !newID.equals(originalID)) {
+                            finalLines.add(line);
+                            continue;
+                        }
+
+                        if (!isValidID(newID) || !isValidAddress(newAddress) || !isValidDate(newBirthday)) {
+                            finalLines.add(line);
+                            continue;
+                        }
+
+                        updatedLine = String.join(",", newID, newFirstName, newLastName, newAddress, originalBirthday, originalIsSuspended);
                     }
 
-                    if (isEvenDigit(originalID.charAt(0)) && !newID.equals(originalID)) {
-                        finalLines.add(line);
-                        continue;
-                    }
-
-                    if (!isValidID(newID) || !isValidAddress(newAddress) || !isValidDate(newBirthday)) {
-                        finalLines.add(line);
-                        continue;
-                    }
-
-                    String updatedLine = String.join(",", newID, newFirstName, newLastName, newAddress, newBirthday, originalIsSuspended);
                     finalLines.add(updatedLine);
-                    updated = true;
+                    updated = true; // to return a bool value
                 } else {
                     finalLines.add(line);
                 }
             }
 
             reader.close();
-
+            // adding this new line to the txt file
             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false));
             for (String finalLine : finalLines) {
                 writer.write(finalLine);
@@ -135,7 +158,9 @@ public class Person {
         }
     }
 
+    // add Demerit points method
     public String addDemeritPoints(String personID, int points, String dateStr) {
+        // validating date and demerit points
         if (!dateStr.matches("\\d{2}-\\d{2}-\\d{4}") || points < 1 || points > 6) return "Failed";
 
         try {
@@ -187,7 +212,7 @@ public class Person {
     }
 
     private boolean isValidID(String id) {
-        return id.matches("^[2-9]{2}.{1,6}[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]{2,}.*[A-Z]{2}$") && id.length() == 10;
+        return id.matches("^[2-9]{2}.{1,6}[!@#$%^&()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]{2,}.[A-Z]{2}$") && id.length() == 10;
     }
 
     private boolean isValidAddress(String address) {
