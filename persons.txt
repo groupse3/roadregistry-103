@@ -3,4 +3,11 @@
 35rw##MMWS,Ron,Weasley,2|Main Street|Melbourne|Victoria|Australia,01-03-1980,false
 42dm**SSDD,Draco,Malfoy,6|Main Street|Melbourne|Victoria|Australia,05-06-1980,false
 28ln%%ZZLL,Luna,Lovegood,9|Main Street|Melbourne|Victoria|Australia,13-02-2008,false
-28ab!!zzPP,Neville,Longbottom,10|La trobe Street|Melbourne|Victoria|Australia,30-07-1990,false
+79dd$#ggMM,George,Smith,50|Ocean Ave|Melbourne|Victoria|Australia,01-01-1995,false,
+44bb$%ttAA,Carlos,Sainz,10|Market St|Melbourne|Victoria|Australia,20-03-1998,false,
+78cc!#yyWW,Max,Verstappen,100|Main Rd|Geelong|Victoria|Australia,10-08-2010,false
+91kk@@hhJJ,Sebastian,Vettel,99|River Rd|Melbourne|Victoria|Australia,15-07-1987,false
+78sw!#rsLU,Luke,Skywalker,12|Tatooine St|Melbourne|Victoria|Australia,19-05-1977,false
+89jh$%reLE,Leia,Organa,25|Alderaan Ave|Sydney|Victoria|Australia,20-10-1978,false
+67hn^@jkHS,Han,Solo,33|Falcon Dr|Geelong|Victoria|Australia,10-12-1975,false
+56dv*&rrDV,Darth,Vader,1|Sith Rd|Hobart|Victoria|Australia,04-04-1970,true,03-05-2024:3;01-06-2024:3;01-05-2024:6;01-04-2024:6
