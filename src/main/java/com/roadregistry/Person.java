@@ -27,6 +27,7 @@ public class Person {
         this.filePath = path;
     }
 
+
     // Constructor to initialize a Person object with details
     public Person(String personID, String firstName, String lastName, String address, String birthday) {
         this.personID = personID;
@@ -35,6 +36,7 @@ public class Person {
         this.address = address;
         this.birthday = birthday;
     }
+
 
     // Adds a new person to the file after validation
     public boolean addPerson() {
@@ -81,6 +83,7 @@ public class Person {
             return false; // Return false if an exception occurs
         }
     }
+
 
     // Updates personal details of an existing person in the file
     public boolean updatePersonalDetails() {
