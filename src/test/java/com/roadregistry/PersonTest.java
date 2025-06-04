@@ -6,14 +6,9 @@ import java.io.*;
 
 public class PersonTest {
 
-    @BeforeEach
-    public void setup() throws Exception {
+    @BeforeAll
+    public static void setup() throws Exception {
         new FileWriter("test_persons.txt", false).close(); // Clear file before each test
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-        new FileWriter("test_persons.txt", false).close(); // Clear file after each test
     }
 
     // ----------------- addPerson Tests -----------------
@@ -129,6 +124,7 @@ public class PersonTest {
         p.setFilePath("test_persons.txt");
         p.addPerson();
         Person p1 = new Person("34bb$%ttAA", "Carlos", "Sainz", "10|Market St|Melbourne|Victoria|Australia", "20-03-1998");
+        p1.setOldPersonID("24bb$%ttAA");
         assertFalse(p1.updatePersonalDetails());
     }
 

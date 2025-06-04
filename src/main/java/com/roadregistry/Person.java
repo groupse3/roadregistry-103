@@ -15,22 +15,20 @@ public class Person {
     private HashMap<LocalDate, Integer> demeritPoints = new HashMap<>();
 
     private String filePath = "persons.txt";
-    private String newPersonsFilePath = null;
-    private String updatePersonsFilePath = null;
+    private String oldPersonID = null;
 
+    // Sets the old person ID for reference during updates
+    public void setOldPersonID(String oldID) {
+        this.oldPersonID = oldID;
+    }
+
+    // Sets the file path where person data is stored
     public void setFilePath(String path) {
         this.filePath = path;
     }
 
-    public void setNewPersonsFilePath(String path) {
-        this.newPersonsFilePath = path;
-    }
 
-    public void setUpdatePersonsFilePath(String path) {
-        this.updatePersonsFilePath = path;
-    }
-
-    // Person constructor
+    // Constructor to initialize a Person object with details
     public Person(String personID, String firstName, String lastName, String address, String birthday) {
         this.personID = personID;
         this.firstName = firstName;
@@ -39,13 +37,15 @@ public class Person {
         this.birthday = birthday;
     }
 
-    // Add person function
+
+    // Adds a new person to the file after validation
     public boolean addPerson() {
         try {
             File personsFile = new File(filePath);
             File errorLogFile = new File("error_log.txt");
             Set<String> existingLines = new HashSet<>();
 
+            // Read existing lines from the file if it exists
             if (personsFile.exists()) {
                 BufferedReader reader = new BufferedReader(new FileReader(personsFile));
                 String line;
@@ -55,62 +55,44 @@ public class Person {
                 reader.close();
             }
 
+            // Prepare writers for appending data to files
             BufferedWriter personWriter = new BufferedWriter(new FileWriter(personsFile, true));
             BufferedWriter errorWriter = new BufferedWriter(new FileWriter(errorLogFile, true));
 
-            boolean added = false;
-            if (newPersonsFilePath != null) {
-                BufferedReader newReader = new BufferedReader(new FileReader(newPersonsFilePath));
-                String newLine;
-                while ((newLine = newReader.readLine()) != null) {
-                    String[] parts = newLine.split(",", -1);
-                    if (parts.length != 6 ||
-                            !isValidID(parts[0].trim()) ||
-                            !isValidAddress(parts[3].trim()) ||
-                            !isValidDate(parts[4].trim()) ||
-                            existingLines.contains(newLine.trim())) {
-                        errorWriter.write("Validation or duplicate failed: " + newLine);
-                        errorWriter.newLine();
-                        continue;
-                    }
-                    personWriter.write(newLine.trim());
-                    personWriter.newLine();
-                    added = true;
-                }
-                newReader.close();
-            } else {
-                String personRecord = toCSV();
-                if (!isValidID(personID) || !isValidAddress(address) || !isValidDate(birthday) || existingLines.contains(personRecord)) {
-                    errorWriter.write("Validation failed: " + personRecord);
-                    errorWriter.newLine();
-                    errorWriter.close();
-                    personWriter.close();
-                    return false;
-                }
-                personWriter.write(personRecord);
-                personWriter.newLine();
-                added = true;
+            // Convert person details to CSV format
+            String personRecord = toCSV();
+
+            // Validate the person details and check for duplicates
+            if (!isValidID(personID) || !isValidAddress(address) || !isValidDate(birthday) || existingLines.contains(personRecord)) {
+                errorWriter.write("Validation failed: " + personRecord);
+                errorWriter.newLine();
+                errorWriter.close();
+                personWriter.close();
+                return false; // Return false if validation fails
             }
+
+            // Write the valid person record to the file
+            personWriter.write(personRecord);
+            personWriter.newLine();
 
             personWriter.close();
             errorWriter.close();
-            return added;
+            return true; // Return true if the person is added successfully
 
         } catch (IOException e) {
-            return false;
+            return false; // Return false if an exception occurs
         }
     }
 
-    // update personal details function
+
+    // Updates personal details of an existing person in the file
     public boolean updatePersonalDetails() {
         try {
+            // Read the original file into a list of lines
             File originalFile = new File(filePath);
-            File updateFile = updatePersonsFilePath != null ? new File(updatePersonsFilePath) : null;
-
             List<String> originalLines = new ArrayList<>();
             boolean updated = false;
 
-            // Load original persons.txt
             BufferedReader originalReader = new BufferedReader(new FileReader(originalFile));
             String line;
             while ((line = originalReader.readLine()) != null) {
@@ -118,103 +100,60 @@ public class Person {
             }
             originalReader.close();
 
-            // Load updates
-            List<String[]> updates = new ArrayList<>();
-            if (updateFile != null && updateFile.exists()) {
-                BufferedReader updateReader = new BufferedReader(new FileReader(updateFile));
-                while ((line = updateReader.readLine()) != null) {
-                    updates.add(Arrays.stream(line.split(",", -1)).map(String::trim).toArray(String[]::new));
-                }
-                updateReader.close();
-            } else {
-                updates.add(new String[]{personID.trim(), personID.trim(), firstName.trim(), lastName.trim(), address.trim(), birthday.trim()});
-            }
+            // Iterate through the lines to find and update the matching record
+            for (int i = 0; i < originalLines.size(); i++) {
+                String[] parts = originalLines.get(i).split(",", -1);
+                if (parts.length < 6) continue;
 
-            // Apply updates
-            for (String[] updateParts : updates) {
+                String originalID = parts[0].trim();
+                String idToMatch = (oldPersonID == null || oldPersonID.isEmpty()) ? personID : oldPersonID;
 
-                String oldID, newID, newFirstName, newLastName, newAddress, newBirthday;
-                if (updateParts.length == 6) {
-                    // Correct assumption: 6 fields means full update with new and old ID
-                    oldID = updateParts[0];
-                    newID = updateParts[1];
-                    newFirstName = updateParts[2];
-                    newLastName = updateParts[3];
-                    newAddress = updateParts[4];
-                    newBirthday = updateParts[5];
-                } else if (updateParts.length == 5) {
-                    // If only 5 fields, assume same ID
-                    oldID = updateParts[0];
-                    newID = updateParts[0];
-                    newFirstName = updateParts[1];
-                    newLastName = updateParts[2];
-                    newAddress = updateParts[3];
-                    newBirthday = updateParts[4];
-                } else {
-                    System.out.println("Skipped malformed update line: " + Arrays.toString(updateParts));
+                // Check if the current line matches the person ID
+                if (!originalID.equals(idToMatch)) continue;
+
+                // Check if the ID is changing and validate the change
+                boolean idChanging = !personID.equals(originalID);
+                if (idChanging && isEvenDigit(originalID.charAt(0))) {
+                    System.out.println("Skipped: even ID can't be changed");
                     continue;
                 }
 
-                for (int i = 0; i < originalLines.size(); i++) {
-                    String[] parts = originalLines.get(i).split(",", -1);
-                    if (parts.length < 6) continue;
+                // Extract original details for comparison
+                String originalFirstName = parts[1].trim();
+                String originalLastName = parts[2].trim();
+                String originalAddress = parts[3].trim();
+                String originalBirthday = parts[4].trim();
+                String originalIsSuspended = parts[5].trim();
+                String originalDemerits = (parts.length > 6) ? parts[6] : "";
 
-                    String originalID = parts[0].trim();
-                    if (!originalID.equals(oldID)) continue;
+                // Validate changes based on age and other conditions
+                int age = getAge(originalBirthday);
+                boolean birthdayChanging = !birthday.equals(originalBirthday);
+                boolean nameOrAddressChanging = !firstName.equals(originalFirstName)
+                        || !lastName.equals(originalLastName)
+                        || !address.equals(originalAddress);
 
-                    String originalFirstName = parts[1].trim();
-                    String originalLastName = parts[2].trim();
-                    String originalAddress = parts[3].trim();
-                    String originalBirthday = parts[4].trim();
-                    String originalIsSuspended = parts[5].trim();
-                    String originalDemerits = (parts.length > 6) ? parts[6] : "";
-
-                    // Validation
-                    int age = getAge(originalBirthday);
-                    boolean birthdayChanging = !newBirthday.equals(originalBirthday);
-                    boolean idChanging = !newID.equals(originalID);
-                    boolean nameOrAddressChanging = !newFirstName.equals(originalFirstName)
-                            || !newLastName.equals(originalLastName)
-                            || !newAddress.equals(originalAddress);
-
-                    if (age < 18 && !newAddress.equals(originalAddress)) {
-                        System.out.println("Skipped: under 18 can't change address");
-                        continue;
-                    }
-                    if (birthdayChanging && nameOrAddressChanging) {
-                        System.out.println("Skipped: changing birthday and other fields");
-                        System.out.println("Comparing:");
-                        System.out.println("Original Birthday: '" + originalBirthday + "'");
-                        System.out.println("New Birthday:      '" + newBirthday + "'");
-                        continue;
-                    }
-                    if (idChanging && isEvenDigit(originalID.charAt(0))) {
-                        System.out.println("Skipped: even ID can't be changed");
-                        continue;
-                    }
-                    if (!isValidID(newID.trim()) || !isValidAddress(newAddress) || !isValidDate(newBirthday)) {
-                        System.out.println("Skipped: invalid input data");
-                        System.out.println("Check input:");
-                        System.out.println("Old ID: " + oldID);
-                        System.out.println("New ID: " + newID);
-                        System.out.println("Valid ID? " + isValidID(newID));
-                        System.out.println("Valid Address? " + isValidAddress(newAddress));
-                        System.out.println("Valid Date? " + isValidDate(newBirthday));
-                        continue;
-                    }
-
-                    // Replace line
-                    String updatedLine = String.join(",", newID, newFirstName, newLastName, newAddress, newBirthday, originalIsSuspended, originalDemerits);
-                    System.out.println("Updating line: " + updatedLine);
-                    originalLines.set(i, updatedLine);
-                    updated = true;
-                    break;
+                if (age < 18 && !address.equals(originalAddress)) {
+                    System.out.println("Skipped: under 18 can't change address");
+                    continue;
                 }
+                if (birthdayChanging && nameOrAddressChanging) {
+                    System.out.println("Skipped: changing birthday and other fields");
+                    continue;
+                }
+                if (!isValidID(personID) || !isValidAddress(address) || !isValidDate(birthday)) {
+                    continue;
+                }
+
+                // Update the line with new details
+                String updatedLine = String.join(",", personID, firstName, lastName, address, birthday, originalIsSuspended, originalDemerits);
+                originalLines.set(i, updatedLine);
+                updated = true;
+                break;
             }
 
-            // Write updated lines back to file
+            // Write the updated lines back to the file if changes were made
             if (updated) {
-                System.out.println("Writing updates to: " + new File(filePath).getAbsolutePath());
                 BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
                 for (String updatedLine : originalLines) {
                     writer.write(updatedLine);
@@ -223,18 +162,17 @@ public class Person {
                 writer.close();
             }
 
-            return updated;
+            return updated; // Return true if the update was successful
 
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return false;  // Return false if an exception occurs
         }
     }
 
-    // add demerit points function
+    // Adds demerit points to a person and updates suspension status if necessary
     public String addDemeritPoints(String personID, int points, String dateStr) {
         if (!dateStr.matches("\\d{2}-\\d{2}-\\d{4}") || points < 1 || points > 6) return "Failed";
-
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate offenseDate = LocalDate.parse(dateStr, formatter);
@@ -250,6 +188,7 @@ public class Person {
             boolean updated = false;
             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
 
+            // Iterate through the lines to find and update the matching record
             for (String l : lines) {
                 String[] parts = l.split(",", -1);
                 if (parts[0].equals(personID)) {
@@ -257,6 +196,7 @@ public class Person {
                     String existingDemerits = (parts.length > 6) ? parts[6] : "";
                     HashMap<LocalDate, Integer> allDemerits = new HashMap<>();
 
+                    // Parse existing demerit points
                     if (!existingDemerits.isEmpty()) {
                         for (String entry : existingDemerits.split(";")) {
                             String[] pair = entry.split(":");
@@ -266,10 +206,14 @@ public class Person {
                         }
                     }
 
+                    // Add the new demerit points
                     allDemerits.put(offenseDate, points);
+
+                    // Calculate total recent points and determine suspension status
                     int totalRecentPoints = allDemerits.entrySet().stream().filter(e -> e.getKey().isAfter(LocalDate.now().minusYears(2))).mapToInt(Map.Entry::getValue).sum();
                     boolean suspend = (age < 21 && totalRecentPoints > 6) || (age >= 21 && totalRecentPoints > 12);
 
+                    // Update the line with new details
                     List<String> updatedEntries = new ArrayList<>();
                     for (Map.Entry<LocalDate, Integer> entry : allDemerits.entrySet()) {
                         updatedEntries.add(entry.getKey().format(formatter) + ":" + entry.getValue());
@@ -285,23 +229,18 @@ public class Person {
             }
 
             writer.close();
-            return updated ? "Success" : "Failed";
+            return updated ? "Success" : "Failed"; // Return success or failure
 
         } catch (Exception e) {
-            return "Failed";
+            return "Failed"; // Return failure if an exception occurs
         }
     }
 
+    // Validates if the person ID meets the required format
     private boolean isValidID(String id) {
         if (id == null || id.length() != 10) return false;
-
-        // First 2 digits must be between 2–9
         if (!id.substring(0, 2).matches("[2-9]{2}")) return false;
-
-        // Last 2 characters must be uppercase letters
         if (!id.substring(8).matches("[A-Z]{2}")) return false;
-
-        // Middle 6 characters must include at least 2 special characters
         String middle = id.substring(2, 8);
         int specialCount = 0;
         for (char c : middle.toCharArray()) {
@@ -309,27 +248,32 @@ public class Person {
                 specialCount++;
             }
         }
-
         return specialCount >= 2;
     }
+
+    // Validates if the address meets the required format
     private boolean isValidAddress(String address) {
         return address.matches("\\d+\\|[^|]+\\|[^|]+\\|Victoria\\|[^|]+");
     }
 
+    // Validates if the date is in the correct format
     private boolean isValidDate(String date) {
         return date.matches("\\d{2}-\\d{2}-\\d{4}");
     }
 
+    // Calculates the age of a person based on their date of birth
     private int getAge(String dob) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate birthDate = LocalDate.parse(dob, formatter);
         return LocalDate.now().getYear() - birthDate.getYear();
     }
 
+    // Checks if a character is an even digit
     private boolean isEvenDigit(char ch) {
         return Character.isDigit(ch) && (ch - '0') % 2 == 0;
     }
 
+    // Converts the person's details to a format string
     private String toCSV() {
         return String.join(",", personID, firstName, lastName, address, birthday, String.valueOf(isSuspended));
     }

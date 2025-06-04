@@ -1,5 +1,0 @@
-78sw!#rsLU,Luke,Skywalker,12|Tatooine St|Melbourne|Victoria|Australia,19-05-1977,false
-89jh$%reLE,Leia,Organa,25|Alderaan Ave|Sydney|Victoria|Australia,20-10-1978,false
-67hn^@jkHS,Han,Solo,33|Falcon Dr|Geelong|Victoria|Australia,10-12-1975,false
-56dv*&rrDV,Darth,Vader,1|Sith Rd|Hobart|Victoria|Australia,04-04-1970,false
-91ob@!knOB,Obi-Wan,Kenobi,50|Jedi Ln|Melbourne|Victoria|Australia,15-08-1965,false
