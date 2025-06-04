@@ -112,6 +112,7 @@ public class PersonTest {
         p.setFilePath("test_persons.txt");
         p.addPerson();
         Person p1 = new Person("34bb$%ttAA", "Carlos", "Sainz", "10|Market St|Melbourne|Victoria|Australia", "20-03-1998");
+        p1.setOldPersonID("24bb$%ttAA");
         assertFalse(p1.updatePersonalDetails());
     }
 

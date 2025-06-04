@@ -15,7 +15,11 @@ public class Person {
     private HashMap<LocalDate, Integer> demeritPoints = new HashMap<>();
 
     private String filePath = "persons.txt";
+    private String oldPersonID = null;
 
+    public void setOldPersonID(String oldID) {
+        this.oldPersonID = oldID;
+    }
     public void setFilePath(String path) {
         this.filePath = path;
     }
@@ -84,7 +88,14 @@ public class Person {
                 if (parts.length < 6) continue;
 
                 String originalID = parts[0].trim();
-                if (!originalID.equals(personID)) continue;
+                String idToMatch = (oldPersonID == null || oldPersonID.isEmpty()) ? personID : oldPersonID;
+                if (!originalID.equals(idToMatch)) continue;
+
+                boolean idChanging = !personID.equals(originalID);
+                if (idChanging && isEvenDigit(originalID.charAt(0))) {
+                    System.out.println("Skipped: even ID can't be changed");
+                    continue;
+                }
 
                 String originalFirstName = parts[1].trim();
                 String originalLastName = parts[2].trim();
