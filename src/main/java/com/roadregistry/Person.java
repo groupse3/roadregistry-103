@@ -30,6 +30,7 @@ public class Person {
         this.updatePersonsFilePath = path;
     }
 
+    // Person constructor
     public Person(String personID, String firstName, String lastName, String address, String birthday) {
         this.personID = personID;
         this.firstName = firstName;
@@ -38,6 +39,7 @@ public class Person {
         this.birthday = birthday;
     }
 
+    // Add person function
     public boolean addPerson() {
         try {
             File personsFile = new File(filePath);
@@ -99,6 +101,7 @@ public class Person {
         }
     }
 
+    // update personal details function
     public boolean updatePersonalDetails() {
         try {
             File originalFile = new File(filePath);
@@ -228,6 +231,7 @@ public class Person {
         }
     }
 
+    // add demerit points function
     public String addDemeritPoints(String personID, int points, String dateStr) {
         if (!dateStr.matches("\\d{2}-\\d{2}-\\d{4}") || points < 1 || points > 6) return "Failed";
 
