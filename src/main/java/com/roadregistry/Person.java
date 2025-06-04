@@ -251,17 +251,17 @@ public class Person {
         return specialCount >= 2;
     }
 
-    // Validates if the address meets the required format
+    // Checks if the address is in the correct format
     private boolean isValidAddress(String address) {
         return address.matches("\\d+\\|[^|]+\\|[^|]+\\|Victoria\\|[^|]+");
     }
 
-    // Validates if the date is in the correct format
+    // Checks if the date is in the correct foramt.
     private boolean isValidDate(String date) {
         return date.matches("\\d{2}-\\d{2}-\\d{4}");
     }
 
-    // Calculates the age of a person based on their date of birth
+    // Determines the age of a person based on their date of birth
     private int getAge(String dob) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate birthDate = LocalDate.parse(dob, formatter);
