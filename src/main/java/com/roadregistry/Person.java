@@ -262,11 +262,11 @@ public class Person {
     }
 
     // Determines the age of a person based on their date of birth
-    private int getAge(String dob) {
+     private int getAge(String dob) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate birthDate = LocalDate.parse(dob, formatter);
         return LocalDate.now().getYear() - birthDate.getYear();
-    }
+    } 
 
     // Checks if a character is an even digit
     private boolean isEvenDigit(char ch) {
